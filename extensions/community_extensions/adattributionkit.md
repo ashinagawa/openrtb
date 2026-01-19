@@ -186,6 +186,7 @@ Bid responses that contain invalid or malformed SKAdNetwork extensions may be re
 - SDK uses the AppImpression object to call handleTap([reengagementURL:][8]) with reengagementurl for Custom Click attribution
 
 If valid, Apple will consider the app for install/Reengagement attribution
+
 7. Target app must register that user for AdAttributionKit attribution on app launch.
 8. (Optional). Target app can choose to provide an additional 6 bits of conversion value information.
 9. If SKAdNetwork determines that the DSP’s click led to the install, Apple will send a postback to the DSP’s registered endpoint with the ids of the source app, target app and campaign, and conversion value if provided by the target app.
