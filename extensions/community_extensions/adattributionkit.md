@@ -6,7 +6,7 @@
 
 Sponsors: TBD
 
-Document verison support: AdAttributionKit versions 1.0. Support for newer versions will be brought up for consideration within the IAB TL Programmatic working group subcommittee.
+Document verison support: [AdAttributionKit][1] versions 1.0. Support for newer versions will be brought up for consideration within the IAB TL Programmatic working group subcommittee.
 
 ## 1. Overview
 
@@ -87,7 +87,6 @@ The object is only present if both the SSP SDK version and the OS version (iOS 1
 }
 ```
 
-          "version": "1.0",
 ---
 
 ## 5. Bid Response
@@ -154,3 +153,63 @@ Configuration for SKOverlay presentation.
   ]
 }
 ```
+
+---
+
+## 6. Loss Reason Code
+
+Bid responses that contain invalid or malformed SKAdNetwork extensions may be rejected. This rejection can be communicated in loss notifications (lurl) using [Loss Reason Code][2] `214`.
+
+<table>
+  <tr>
+    <td><strong>Value</strong></td>
+    <td><strong>Definition</strong></td>
+  </tr>
+  <tr>
+    <td>214</td>
+    <td>Creative Filtered - Invalid SKAdNetwork</td>
+  </tr>
+</table>
+
+## 7.  AdAttributionKit Support Flow
+
+1. SSP SDK retrieves the SKAdNetworkItems from the publisher app’s Info.plist
+2. SDK makes ad request to ad server including SKAdNetworkItems
+3. SSP determines from Info.plist which DSPs have AdAttributionKit capabilities. Bid request to eligible DSPs includes the imp.ext.adattributionkit object, defined above
+4. DSP responds, including `BidResponse.seatbid.bid.ext.adattributionkit` if the campaign requires AdAttributionKit support
+5. Ad response to SDK includes `adattributionkit` object
+6. If the impression is shown and the user clicks, SSP does
+- SDK creates AppImpression object with jwt ([doc][3])
+- SDK loads SKStoreProductViewController with the AppImpression object ([doc][4])
+- SDK uses the AppImpression object to SKOverlay.AppConfiguration ([doc][5])
+- SDK uses the AppImpression object to begin and end View-Though attribution (begin: [doc][6], end: [doc][7])
+- SDK uses the AppImpression object to call handleTap([reengagementURL:][8]) with reengagementurl for Custom Click attribution
+If valid, Apple will consider the app for install/Reengagement attribution
+7. Target app must register that user for AdAttributionKit attribution on app launch.
+8. (Optional). Target app can choose to provide an additional 6 bits of conversion value information.
+9. If SKAdNetwork determines that the DSP’s click led to the install, Apple will send a postback to the DSP’s registered endpoint with the ids of the source app, target app and campaign, and conversion value if provided by the target app.
+
+---
+
+## 8. IABTL managed SKAdnetwork ID list
+
+Refer to [SKAdnetwork spec][9]
+
+---
+
+## 9. Change Log
+
+| Version | Date | Description |
+|---------|------|-------------|
+| 1.0 | TBD | Initial release |
+
+
+[1]: https://developer.apple.com/documentation/AdAttributionKit
+[2]: https://github.com/InteractiveAdvertisingBureau/openrtb/blob/master/OpenRTB%20v3.0%20FINAL.md#list--loss-reason-codes-
+[3]: https://developer.apple.com/documentation/adattributionkit/appimpression/
+[4]: https://developer.apple.com/documentation/storekit/skstoreproductviewcontroller/loadproduct%28parameters:impression:%29
+[5]: https://developer.apple.com/documentation/storekit/skoverlay/appconfiguration/appimpression
+[6]: https://developer.apple.com/documentation/adattributionkit/appimpression/beginview%28%29
+[7]: https://developer.apple.com/documentation/adattributionkit/appimpression/endview%28%29
+[8]: https://developer.apple.com/documentation/adattributionkit/appimpression/handletap(reengagementurl:)
+[9]: https://github.com/InteractiveAdvertisingBureau/openrtb/blob/main/extensions/community_extensions/skadnetwork.md#iabtl-managed-skadnetwork-id-list
