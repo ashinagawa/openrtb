@@ -2,18 +2,15 @@
 
 **Status:** Draft (Community Extension Proposal)  
 **Related:** OpenRTB 2.x / 3.x Extensions Mechanism  
-**Primary Contact / Editors:** *<your name / org>*  
 **Version:** 0.1 (Draft)
 
+
+Sponsors: TBD
+
+Document verison support: AdAttributionKit versions 1.0. Support for newer versions will be brought up for consideration within the IAB TL Programmatic working group subcommittee.
+
+
 ## 1. Overview
-
-Apple’s **AdAttributionKit** is a privacy-preserving attribution framework in which:
-
-- **Ad networks** register with Apple, receive an **ad network identifier**, and **sign ads** to make them eligible for attribution and postbacks.   
-- **Publisher apps** display those ads and must include allowed ad network identifiers in their app configuration for impressions to qualify.   
-- **Advertised apps** update conversion values; Apple delivers **postbacks** (as **JWS**) to ad networks (and optionally developers).   
-
-AdAttributionKit postbacks include fields such as **impression-type**, **ad-network-identifier**, **source-identifier**, **advertised-item-identifier**, **conversion-type**, **postback-identifier**, **did-win**, and **postback-sequence-index** (with some optional fields). 
 
 This proposal defines a standardized way in OpenRTB to:
 
