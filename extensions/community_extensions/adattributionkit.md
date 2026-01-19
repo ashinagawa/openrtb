@@ -4,11 +4,9 @@
 **Related:** OpenRTB 2.x / 3.x Extensions Mechanism  
 **Version:** 0.1 (Draft)
 
-
 Sponsors: TBD
 
 Document verison support: AdAttributionKit versions 1.0. Support for newer versions will be brought up for consideration within the IAB TL Programmatic working group subcommittee.
-
 
 ## 1. Overview
 
@@ -31,70 +29,170 @@ A DSP bids with creatives that are eligible for AdAttributionKit attribution. Th
 AdAttributionKit supports a conversion type representing reengagement (“re-engagement”).   
 The bidder may need to indicate that the ad is eligible for reengagement measurement and provide the appropriate destination URL inputs.
 
-### 2.3 Winner and runner-up postbacks
-For install conversions, Apple indicates **one winner** plus up to **five non-winning** (“did-win”: false) postbacks for qualifying networks.   
-(OpenRTB itself doesn’t deliver postbacks, but this impacts how participants interpret measurement and deduplication.)
-
 ---
 
 ## 3. Extension Name and Placement
 
 ### 3.1 Extension Key
-`aakn` (AdAttributionKit Network)
+`adattributionkit` (AdAttributionKit Network)
 
 ### 3.2 Object Placement (OpenRTB 2.x)
-- **BidRequest.Imp.ext.aakn** — publisher signals eligibility / constraints and capabilities
-- **BidResponse.SeatBid.Bid.ext.aakn** — bidder returns AdAttributionKit materials
+- **BidRequest.Imp.ext.adattributionkit** — publisher signals eligibility / constraints and capabilities
+- **BidResponse.SeatBid.Bid.ext.adattributionkit** — bidder returns AdAttributionKit materials
 
-(Implementations MAY also attach `aakn` under `BidResponse.ext` if they prefer response-wide declarations, but the canonical placement is at the bid level to support multi-imp responses.)
 
 ### 3.3 Object Placement (OpenRTB 3.x)
-- **Request.item[].spec.ext.aakn**
-- **Response.seatbid[].bid[].ext.aakn**
+- **Request.item[].spec.ext.adattributionkit**
+- **Response.seatbid[].bid[].ext.adattributionkit**
 
 ---
 
-## 4. `aakn` Object (Request)
+## 4. Bid Request
 
-### 4.1 Rationale
-Publisher apps must be configured with ad network identifiers for attribution eligibility.   
-The request object allows the publisher/exchange to communicate which AAK ad networks are supported/allowed in that app context.
+### Object: `BidRequest.imp.ext.adattributionkit`
 
-### 4.2 Object Definition: `BidRequest.imp.ext.aakn`
+When traffic is eligible for AdAttributionKit, SSPs should include a new `adattributionkit` object under `BidRequest.imp.ext`. This object informs DSPs that they can respond with AAK data for attribution.
 
-| Field | Type | Scope | Description |
-|---|---:|---|---|
-| `netids` | `string[]` | recommended | List of AdAttributionKit ad network identifiers supported by the publisher app in this context (lowercase). Apple indicates ad network IDs are lowercase identifiers of the form `example123.adattribuitionkit`.  |
-| `netlist` | `object` | optional | Reference to a remotely hosted list of supported AdAttributionKit ad network IDs (see `aaknetlist` below). Intended for large/maintained lists. (See also IAB’s SKAdNetwork ID list tooling as precedent.)  |
-| `support_reengagement` | `boolean` | optional | Indicates whether the publisher placement is eligible for reengagement measurement flows (if buyer supports). |
-| `require_jws_impression` | `boolean` | optional | If true, the buyer must supply a signed impression payload (JWS) in the response `aakn` object. AdAttributionKit uses JWS for postbacks and Apple describes JWS formatted impressions.  |
+The object is only present if both the SSP SDK version and the OS version (iOS 17.4+) support AdAttributionKit.
 
-#### Notes
-- `netids` and `netlist` are mutually compatible; if both are present, `netids` takes precedence for immediate filtering, while `netlist` may be used for auditing/completeness.
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| version | string; required | Version of AdAttributionKit supported (e.g., "1.0"). Dependent on both the OS version and the SDK version. |
+| sourceapp | string; required | The App Store ID of the publisher's app. |
+| skadnetids | array of strings; required | A subset of `SKAdNetworkItem` entries in the publisher app's `Info.plist` that are relevant to the bid request. These are the AdNetwork IDs that the DSP can use for attribution. |
+| ext | object; optional | Placeholder for exchange-specific extensions to OpenRTB. |
+| ext.sko | integer; optional | Indicates whether SKOverlay is available. `1` = available, `0` = not available. |
 
----
+### Example Bid Request
 
-## 5. `aaknetlist` Object (Request)
-
-### 5.1 Purpose
-Some publishers will prefer to reference a maintained list (similar to how the ecosystem uses centralized SKAdNetwork ID lists). 
-
-### 5.2 Object Definition: `BidRequest.imp.ext.aakn.netlist`
-
-| Field | Type | Description |
-|---|---:|---|
-| `url` | `string` | HTTPS URL to fetch a JSON document containing supported AdAttributionKit ad network IDs. |
-| `format` | `string` | Format identifier, e.g. `"aakn-netids-1"` |
-| `max` | `integer` | Optional maximum number of entries the fetcher should accept. |
-| `excl` | `string[]` | Optional list of excluded ad network IDs (e.g. blocked partners). |
-
-### 5.3 Suggested JSON Format (`aakn-netids-1`)
 ```json
 {
-  "format": "aakn-netids-1",
-  "generated_at": "2026-01-15T00:00:00Z",
-  "netids": [
-    "example123.adattribuitionkit",
-    "example456.adattribuitionkit"
+  "imp": [
+    {
+      "ext": {
+        "adattributionkit": {
+          "version": "1.0",
+          "sourceapp": "123123123",
+          "skadnetids": [
+            "m8dbw4sv7c.skadnetwork",
+            "m2jqnlggk3.adattributionkit"
+          ],
+          "ext": {
+            "sko": 1
+          }
+        }
+      }
+    }
   ]
 }
+```
+
+### Example Bid Request with Both AAK and SKAN
+
+```json
+{
+  "imp": [
+    {
+      "ext": {
+        "adattributionkit": {
+          "version": "1.0",
+          "sourceapp": "123123123",
+          "skadnetids": [
+            "m8dbw4sv7c.skadnetwork",
+            "m2jqnlggk3.adattributionkit"
+          ],
+          "ext": {
+            "sko": 1
+          }
+        },
+        "skadn": {
+          "version": "4.0",
+          "versions": [
+            "2.0",
+            "2.2",
+            "3.0",
+            "4.0"
+          ],
+          "sourceapp": "123123123",
+          "skadnetids": [
+            "m8dbw4sv7c.skadnetwork",
+            "tl55sbb4fm.skadnetwork",
+            "6xzpu9s2p8.skadnetwork",
+            "m2jqnlggk3.adattributionkit"
+          ],
+          "ext": {
+            "sko": 0
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 5. Bid Response
+
+### Object: `BidResponse.seatbid.bid.ext.adattributionkit`
+
+If the bid request indicated AAK support, DSPs can return AAK attribution data using a custom extension field under `BidResponse.seatbid.bid.ext.adattributionkit`.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| jwt | string; required | Signed compact JWS object to be used on device for AAK implementation. This contains the signed attribution data. |
+| version | string; required | Version of AdAttributionKit (e.g., "1.0"). |
+| itunesitem | string; required | The App Store ID of the advertised app. |
+| cpp | string; optional | The Custom Product Page ID (PPID) for the advertised app. |
+| reengagementurl | string; optional | The re-engagement URL for Custom Click attribution. Only supported on iOS 18+. |
+| ext | object; optional | Placeholder for exchange-specific extensions to OpenRTB. |
+| ext.skoverlay | object; optional | Object containing SKOverlay configuration parameters. |
+
+### Object: `ext.skoverlay`
+
+Configuration for SKOverlay presentation.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| show | integer | Whether to show the SKOverlay. `1` = show, `0` = do not show. |
+| delay | integer | Delay in seconds before showing the overlay. |
+| companion_delay | integer | Delay in seconds for companion overlay. |
+| pos | integer | Position of the overlay. |
+| autoclose | integer | Auto-close delay in seconds. |
+| dismissible | integer | Whether the overlay is dismissible. `1` = dismissible, `0` = not dismissible. |
+| click_on_view | integer | Whether clicks on the view trigger the overlay. `1` = enabled, `0` = disabled. |
+
+### Example Bid Response
+
+```json
+{
+  "seatbid": [
+    {
+      "bid": [
+        {
+          "ext": {
+            "adattributionkit": {
+              "jwt": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImZha2Uua2V5In0.eyJpbXByZXNzaW9uLXR5cGUiOiJhcHAtaW1wcmVzc2lvbiIsImFkLW5ldHdvcmstaWRlbnRpZmllciI6Im15ZHNwLmFkYXR0cmlidXRpb25raXQiLCJwdWJsaXNoZXItaXRlbS1pZGVudGlmaWVyIjowLCJzb3VyY2UtaWRlbnRpZmllciI6MTIzNCwidGltZXN0YW1wIjoxNzAwMDAwMDAwfQ.signature",
+              "version": "1.0",
+              "itunesitem": "12345678",
+              "cpp": "d7db643c-f84f-41d5-b2b3-fce30bf73640",
+              "reengagementurl": "https://app.com/re",
+              "ext": {
+                "skoverlay": {
+                  "show": 1,
+                  "delay": 5,
+                  "companion_delay": 3,
+                  "pos": 1,
+                  "autoclose": 3,
+                  "dismissible": 1,
+                  "click_on_view": 0
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
