@@ -87,49 +87,7 @@ The object is only present if both the SSP SDK version and the OS version (iOS 1
 }
 ```
 
-### Example Bid Request with Both AAK and SKAN
-
-```json
-{
-  "imp": [
-    {
-      "ext": {
-        "adattributionkit": {
           "version": "1.0",
-          "sourceapp": "123123123",
-          "skadnetids": [
-            "m8dbw4sv7c.skadnetwork",
-            "m2jqnlggk3.adattributionkit"
-          ],
-          "ext": {
-            "sko": 1
-          }
-        },
-        "skadn": {
-          "version": "4.0",
-          "versions": [
-            "2.0",
-            "2.2",
-            "3.0",
-            "4.0"
-          ],
-          "sourceapp": "123123123",
-          "skadnetids": [
-            "m8dbw4sv7c.skadnetwork",
-            "tl55sbb4fm.skadnetwork",
-            "6xzpu9s2p8.skadnetwork",
-            "m2jqnlggk3.adattributionkit"
-          ],
-          "ext": {
-            "sko": 0
-          }
-        }
-      }
-    }
-  ]
-}
-```
-
 ---
 
 ## 5. Bid Response
