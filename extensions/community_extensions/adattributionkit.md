@@ -40,11 +40,6 @@ The bidder may need to indicate that the ad is eligible for reengagement measure
 - **BidRequest.Imp.ext.adattributionkit** — publisher signals eligibility / constraints and capabilities
 - **BidResponse.SeatBid.Bid.ext.adattributionkit** — bidder returns AdAttributionKit materials
 
-
-### 3.3 Object Placement (OpenRTB 3.x)
-- **Request.item[].spec.ext.adattributionkit**
-- **Response.seatbid[].bid[].ext.adattributionkit**
-
 ---
 
 ## 4. Bid Request
@@ -158,7 +153,7 @@ Configuration for SKOverlay presentation.
 
 ## 6. Loss Reason Code
 
-Bid responses that contain invalid or malformed SKAdNetwork extensions may be rejected. This rejection can be communicated in loss notifications (lurl) using [Loss Reason Code][2] `214`.
+Bid responses that contain invalid or malformed AdAttributionKit extensions may be rejected. This rejection can be communicated in loss notifications (lurl) using [Loss Reason Code][2] `216`.
 
 <table>
   <tr>
@@ -166,8 +161,8 @@ Bid responses that contain invalid or malformed SKAdNetwork extensions may be re
     <td><strong>Definition</strong></td>
   </tr>
   <tr>
-    <td>214</td>
-    <td>Creative Filtered - Invalid SKAdNetwork</td>
+    <td>216</td>
+    <td>Creative Filtered - Invalid AdAttributionKit</td>
   </tr>
 </table>
 
@@ -193,13 +188,97 @@ Bid responses that contain invalid or malformed SKAdNetwork extensions may be re
 
 ---
 
-## 8. IABTL managed SKAdnetwork ID list
+## 8. Device Extension
+
+### Bid request
+
+#### Object: `BidRequest.device.ext`
+
+If the IDFA is not available, DSPs require an alternative, limited-scope identifier in order to provide basic frequency capping functionality to advertisers. The [IDFV][10] is the same for apps from the same vendor but different across vendors. Please refer to Apple's Guidelines for further information about when it can be accessed and used.
+
+DSPs may also want to understand what is the status of a user on iOS 14+. The `atts` field will pass the AppTrackingTransparency Framework's [authorization status][11].
+
+<table>
+  <thead>
+    <tr>
+      <th>
+        Attribute
+      </th>
+      <th>
+        Description
+      </th>
+      <th>
+        Type
+      </th>
+      <th>
+        Example
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        atts
+      </td>
+      <td>
+        (iOS Only) An integer passed to represent the app's app tracking authorization status, where <br>
+        0 = not determined <br>
+        1 = restricted <br>
+        2 = denied <br>
+        3 = authorized
+      </td>
+      <td>
+        integer
+      </td>
+      <td>
+        "atts": 3
+      </td>
+    </tr>
+    <tr>
+      <td>
+        ifv
+      </td>
+      <td>
+        IDFV of the device in that publisher. Listed as ifv to match ifa field format.
+      </td>
+      <td>
+        string
+      </td>
+      <td>
+        "ifv": "336F2BC0-245B-4242-8029-83762AB47B15"
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+#### Example
+
+```
+{
+  "device": {
+    "ext": {
+      "atts": 2,
+      "ifv": "336F2BC0-245B-4242-8029-83762AB47B15"
+    }
+  }
+}
+```
+
+### DNT, LMT and App Tracking Transparency Guidance
+
+(Pending iOS 14 Golden Master) For iOS 14 and above, the 'DNT' and 'LMT' parameters will be informed by the 'ATTS' status, where
+* "DNT" or "LMT" = 1 when "ATTS" = 0, 1, 2
+* "LMT" or "DNT" = 0 when "ATTS" = 3
+
+---
+
+## 9. IABTL managed SKAdnetwork ID list
 
 Refer to [SKAdnetwork spec][9]
 
 ---
 
-## 9. Change Log
+## 10. Change Log
 
 | Version | Date | Description |
 |---------|------|-------------|
@@ -215,3 +294,6 @@ Refer to [SKAdnetwork spec][9]
 [7]: https://developer.apple.com/documentation/adattributionkit/appimpression/endview%28%29
 [8]: https://developer.apple.com/documentation/adattributionkit/appimpression/handletap(reengagementurl:)
 [9]: https://github.com/InteractiveAdvertisingBureau/openrtb/blob/main/extensions/community_extensions/skadnetwork.md#iabtl-managed-skadnetwork-id-list
+
+[10]: https://developer.apple.com/documentation/uikit/uidevice/identifierforvendor
+[11]: https://developer.apple.com/documentation/apptrackingtransparency/attrackingmanager/authorizationstatus
