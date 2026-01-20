@@ -184,7 +184,7 @@ Bid responses that contain invalid or malformed AdAttributionKit extensions may 
 
 7. Target app must register that user for AdAttributionKit attribution on app launch.
 8. (Optional). Target app can choose to provide an additional 6 bits of conversion value information.
-9. If SKAdNetwork determines that the DSP’s click led to the install, Apple will send a postback to the DSP’s registered endpoint with the ids of the source app, target app and campaign, and conversion value if provided by the target app.
+9. If AdAttributionKit determines that the DSP’s click led to the install, Apple will send a postback to the DSP’s registered endpoint with the ids of the source app, target app and campaign, and conversion value if provided by the target app.
 
 ---
 
@@ -278,7 +278,13 @@ Refer to [SKAdnetwork spec][9]
 
 ---
 
-## 10. Change Log
+## 10. SKAdNetwork ID Lists for App Developers
+
+Refer to [SKAdnetwork spec][12]
+
+---
+
+## 11. Change Log
 
 | Version | Date | Description |
 |---------|------|-------------|
@@ -297,3 +303,4 @@ Refer to [SKAdnetwork spec][9]
 
 [10]: https://developer.apple.com/documentation/uikit/uidevice/identifierforvendor
 [11]: https://developer.apple.com/documentation/apptrackingtransparency/attrackingmanager/authorizationstatus
+[12]: https://github.com/InteractiveAdvertisingBureau/openrtb/blob/main/extensions/community_extensions/skadnetwork.md#skadnetwork-id-lists-for-app-developers
